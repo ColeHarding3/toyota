@@ -56,13 +56,16 @@ function minify(code)
     return table.concat(lines, "\n")
 end
 
+-- Get the running script's path
+local scriptPath = shell.getRunningProgram()
+
 -- Automatically download all files.
 for _, file in ipairs(files) do
     fs.makeDir(file.folder)
     local path = fs.combine(file.folder, file.name)
     
     if fs.exists(path) then
-        print("File '" .. path .. "' already exists. Updating...")
+        print("File '" .. path .. "' already exists. Deleting...")
         fs.delete(path)
     end
     
@@ -86,6 +89,13 @@ for _, file in ipairs(files) do
         print("Error: Failed to fetch file.")
     end
     print()
+end
+
+-- Delete the script if it is in the root directory
+if scriptPath and not scriptPath:find("/") then
+    print("Deleting installer from root...")
+    fs.delete(scriptPath)
+	print("Deleted installer. If you wish to update TOYOTA, please use the '/programs/toyota-updater' instead.")
 end
 
 -- Prevent last key entry to be entered in the shell.
