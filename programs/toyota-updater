@@ -25,7 +25,7 @@ local files = {
         name = "toyota-test",
         url = "https://github.com/coleharding3/toyota/raw/"..branch.."/programs/toyota-test"
     },
-	{
+    {
         folder = "programs",
         name = "toyota-updater",
         url = "https://github.com/coleharding3/toyota/raw/"..branch.."/programs/toyota-updater"
@@ -62,7 +62,8 @@ for _, file in ipairs(files) do
     local path = fs.combine(file.folder, file.name)
     
     if fs.exists(path) then
-        print("Warning: file '" .. path .. "' already exists. Overwriting.")
+        print("File '" .. path .. "' already exists. Updating...")
+        fs.delete(path)
     end
     
     print("Fetching '" .. file.name .. "'...")
