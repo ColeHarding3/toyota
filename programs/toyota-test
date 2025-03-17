@@ -1,9 +1,9 @@
-print("start EXTREMELY BASIC toyota test to just move forward 1 block")
+print("start EXTREMELY BASIC toyota test")
 
 os.loadAPI("apis/toyota")
 
 print("api loaded")
 
-toyota.forward()
+toyota.supertest()
 
-print("attempted to move forward 1 block")
+print("done")
