@@ -3,7 +3,7 @@ if not http then
     return
 end
 
-local branch = "master"
+local branch = "main"
 
 -- The list of files we can fetch.
 local files = {
@@ -14,27 +14,18 @@ local files = {
         minify = true
     },
     {
-        folder = "programs",
-        name = "toyota-config",
-        info = "This is a utility application for managing the API's internal state from the shell.",
-        url = "https://github.com/coleharding3/toyota/raw/"..branch.."/programs/toyota-config",
-        ask = true,
-        default = true,
-        minify= true
-    },
-    {
-        folder = "programs",
-        name = "toyota-example",
-        info = "This is an small example application, demonstrating how to write a resumable program using the API.",
-        url = "https://github.com/coleharding3/toyota/raw/"..branch.."/programs/toyota-example",
+        folder = "apis",
+        name = "toyota-src",
+        info = "This is the full, non-minified version of the API. You only need this if you're interested in the implementation details.",
+        url = "https://github.com/coleharding3/toyota/raw/"..branch.."/apis/toyota",
         ask = true,
         default = false
     },
-    {
-        folder = "apis",
-        name = "lama-src",
-        info = "This is the full, non-minified version of the API. You only need this if you're interested in the implementation details.",
-        url = "https://github.com/coleharding3/toyota/raw/"..branch.."/apis/toyota",
+	{
+        folder = "programs",
+        name = "toyota-test",
+        info = "Simple test to move forward 1 block",
+        url = "https://github.com/coleharding3/toyota/raw/"..branch.."/programs/toyota-test",
         ask = true,
         default = false
     }
