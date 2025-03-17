@@ -107,8 +107,8 @@ function private.move(direction)
     end
 
     -- move forward
-    if direction = private.direction.forward then
-        forward()
+    if direction == private.direction.forward then
+        turtle.forward()
     end
     
 end
