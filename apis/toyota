@@ -69,6 +69,8 @@ local numberOfTriesToBreakBlocks = 20
 -- The current version of the API.
 version = "0.1"
 
+-- Namespace for private functions.
+private = {}
 
 -- Movement directions, used for move state, as a bidirectional map.
 private.direction = {
