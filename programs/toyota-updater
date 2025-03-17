@@ -44,7 +44,7 @@ function minify(code)
         :gsub("^%-%-[^%[]*$", "")
         local keep = not inMultilineComment
         if inMultilineComment then
-            if line == "]]") then
+            if line == "]]" then
                 inMultilineComment = false
             end
         elseif line:match("^%-%-%[%[") then
