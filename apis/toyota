@@ -1,51 +1,16 @@
---[[
+--[[ 
     TOYOTA - Tracked Operations Yielding Optimized Turtle Automation - 2025 Cole
 
     This program is licensed under the MIT license.
     http://opensource.org/licenses/mit-license.php
-
-    I will attempt to create an API that tracks turtle movements even when the
-    turtle is moving while the game shuts down or whatever. I will use fuel
-    for directional moving, and some kind of backtracking for rotation.
-
-    The API is relatively basic, in that it is purely focused on movement. It's
-    essentially a rich drop-in replacement for the the original navigational
-    functions in the turtle API:
-        turtle.forward   -> toyota.forward
-        turtle.back      -> toyota.back
-        turtle.up        -> toyota.up
-        turtle.down      -> toyota.down
-        turtle.turnRight -> toyota.turnRight
-        turtle.turnLeft  -> toyota.turnLeft
-
-    When using this API, you must not use any other functions that alter
-    the turtle's position or facing. In particular:
-
-        DO NOT USE turtle.forward, turtle.back, turtle.up, turtle.down,
-        turtle.turnRight or turtle.turnLeft NOR THEIR NATIVE EQUIVALENTS.
-
-    Any other external force changing the turtle's position will also
-    invalidate the coordinates, of course (such as the player pickaxing the
-    turtle and placing it somewhere else or RP2 frames).
-
-    This was inspired by LAMA - Location Aware Movement API - 2013 Sangar
-]]
-
+]] 
 
 -------------------------------------------------------------------------------
 -- Config                                                                    --
 -------------------------------------------------------------------------------
 
--- The absolute path to this file. This is used for generating startup logic
--- which initializes the API by loading it into the OS.
 local apiPath = "apis/lama"
-
--- This is the name of the file in which we store our state, i.e. the position
--- and facing of the turtle, as well as whether it is currently moving or not.
--- We split this up into several files to keep file i/o while moving minimal.
--- You may want to change this if it collides with another program or API.
 local file_fuel = "toyota-memory/fuel"
-
 
 function supertest()
     print("super test worked from TOYOTA")
@@ -57,47 +22,48 @@ function readFuelState()
     end
 
     local file = fs.open(file_fuel, "r")
-    if file then
-        local fuel = tonumber(file.readLine())
-        file.close()
-        return fuel
-    end
-    return nil
+    assert(file, "Error: Failed to open fuel state file for reading.")
+
+    local fuel = file.readLine()
+    file.close()
+    
+    return tonumber(fuel)
 end
 
-function writeFuelState()
-   local logFile = fs.open(file_fuel, "a")
-   if logFile then
-       logFile.writeLine(tostring(initialFuel))
-   end
-end
+function writeFuelState(fuel)
+    assert(type(fuel) == "number", "Error: Fuel value must be a number.")
 
+    local file = fs.open(file_fuel, "w")
+    assert(file, "Error: Failed to open fuel state file for writing.")
+
+    file.writeLine(tostring(fuel))
+    file.close()
+end
 
 function toyotaforward()
     print("---toyota forward start---")
 
-    -- Get initial fuel level
     local initialFuel = turtle.getFuelLevel()
+    assert(initialFuel, "Error: Failed to retrieve initial fuel level.")
 
-    -- log fuel before movement
-    writeFuelState()
+    writeFuelState(initialFuel)
 
-    -- Attempt to move forward
     local success = turtle.forward()
+    assert(success, "Error: Turtle failed to move forward.")
 
-    -- check if fuel level changed
     local currentFuel = turtle.getFuelLevel()
     local previousFuel = readFuelState()
+
+    assert(currentFuel ~= nil and previousFuel ~= nil, "Error: Failed to retrieve fuel levels for verification.")
+
     print("Fuel after move: " .. tostring(currentFuel))
     print("Fuel before move: " .. tostring(previousFuel))
 
     if currentFuel < previousFuel then
-        print("movement confirmed.")
+        print("Movement confirmed.")
     else
-        print("movement is hosed")
+        print("Warning: Movement anomaly detected.")
     end
-
 
     print("---toyota forward end---")
 end
-
