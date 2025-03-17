@@ -32,14 +32,83 @@
 ]]
 
 
+-------------------------------------------------------------------------------
+-- Config                                                                    --
+-------------------------------------------------------------------------------
+
+-- The absolute path to this file. This is used for generating startup logic
+-- which initializes the API by loading it into the OS.
+local apiPath = "apis/lama"
+
+-- This is the name of the file in which we store our state, i.e. the position
+-- and facing of the turtle, as well as whether it is currently moving or not.
+-- We split this up into several files to keep file i/o while moving minimal.
+-- You may want to change this if it collides with another program or API.
+local stateFile = {
+    position  = "/.lama-state",
+    waypoints = "/.lama-waypoints",
+    fuel      = "/.lama-fuel",
+    move      = "/.lama-move-state",
+    path      = "/.lama-path-state",
+    wrap      = "/.lama-wrap-state"
+}
+
 
 function supertest()
     print("super test worked from TOYOTA")
 end
 
+function readFuelState()
+    if not fs.exists(stateFile.fuel) then
+        return nil
+    end
+
+    local file = fs.open(stateFile.fuel, "r")
+    if file then
+        local fuel = tonumber(file.readLine())
+        file.close()
+        return fuel
+    end
+    return nil
+end
+
+function writeFuelState(fuel)
+    local file = fs.open(stateFile.fuel, "w")
+    if file then
+        file.writeLine(tostring(fuel))
+        file.close()
+    end
+end
+
 function toyotaforward()
     print("toyota forward start")
-    turtle.forward()
+
+    -- Get initial fuel level from the state file
+    local initialFuel = readFuelState() or 0
+
+    -- Open a file for logging
+    local logFile = fs.open("fuel_log.txt", "a")
+    if logFile then
+        logFile.writeLine("Initial Fuel: " .. tostring(initialFuel))
+    end
+
+    -- Attempt to move forward
+    local success = turtle.forward()
+
+    -- Get the new fuel level from turtle API and update state file
+    local finalFuel = turtle.getFuelLevel()
+    writeFuelState(finalFuel)
+
+    -- Log the result
+    if logFile then
+        logFile.writeLine("Final Fuel: " .. tostring(finalFuel))
+        logFile.writeLine("Fuel Used: " .. tostring(initialFuel - finalFuel))
+        logFile.writeLine("Move Success: " .. tostring(success))
+        logFile.writeLine("------------------------")
+        logFile.close()
+    end
+
     print("toyota forward end")
 end
+
 
