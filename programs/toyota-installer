@@ -1,0 +1,84 @@
+if not http then
+    print("Sorry, I need access to the internet to download stuff.")
+    return
+end
+
+local branch = "main"
+
+-- The list of files to fetch.
+local files = {
+    {
+        folder = "apis",
+        name = "toyota",
+        url = "https://github.com/coleharding3/toyota/raw/"..branch.."/apis/toyota",
+        minify = true
+    },
+    {
+        folder = "apis",
+        name = "toyota-src",
+        url = "https://github.com/coleharding3/toyota/raw/"..branch.."/apis/toyota"
+    },
+    {
+        folder = "programs",
+        name = "toyota-test",
+        url = "https://github.com/coleharding3/toyota/raw/"..branch.."/programs/toyota-test"
+    }
+}
+
+-- Utility function for shrinking the code.
+function minify(code)
+    local lines = {}
+    local inMultilineComment = false
+    for line in string.gmatch(code, "[^\n]+") do
+        line = line
+        :gsub("^%s*(.-)%s*$", "%1")
+        :gsub("^%-%-[^%[]*$", "")
+        local keep = not inMultilineComment
+        if inMultilineComment then
+            if line == "]]" then
+                inMultilineComment = false
+            end
+        elseif line:match("^%-%-%[%[") then
+            inMultilineComment = true
+            keep = false
+        end
+        if keep and line ~= "" then
+            table.insert(lines, line)
+        end
+    end
+    return table.concat(lines, "\n")
+end
+
+-- Automatically download all files.
+for _, file in ipairs(files) do
+    fs.makeDir(file.folder)
+    local path = fs.combine(file.folder, file.name)
+    
+    if fs.exists(path) then
+        print("Warning: file '" .. path .. "' already exists. Overwriting.")
+    end
+    
+    print("Fetching '" .. file.name .. "'...")
+    local request = http.get(file.url)
+    if request then
+        local response = request.getResponseCode()
+        if response == 200 then
+            local script = request.readAll()
+            if file.minify then
+                script = minify(script)
+            end
+            local f = fs.open(path, "w")
+            f.write(script)
+            f.close()
+            print("Done.")
+        else
+            print("Error: Bad HTTP response code " .. response .. ".")
+        end
+    else
+        print("Error: Failed to fetch file.")
+    end
+    print()
+end
+
+-- Prevent last key entry to be entered in the shell.
+os.sleep(0.1)
