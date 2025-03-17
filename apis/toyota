@@ -30,3 +30,85 @@
 
     This was inspired by LAMA - Location Aware Movement API - 2013 Sangar
 ]]
+
+
+-------------------------------------------------------------------------------
+-- Config                                                                    --
+-------------------------------------------------------------------------------
+
+-- The absolute path to this file. This is used for generating startup logic
+-- which initializes the API by loading it into the OS.
+local apiPath = "apis/toyota"
+
+-- This is the name of the file in which we store our state, i.e. the position
+-- and facing of the turtle, as well as whether it is currently moving or not.
+-- We split this up into several files to keep file i/o while moving minimal.
+-- You may want to change this if it collides with another program or API.
+local stateFile = {
+    position  = "/.toyota-state",
+    waypoints = "/.toyota-waypoints",
+    fuel      = "/.toyota-fuel",
+    move      = "/.toyota-move-state",
+    path      = "/.toyota-path-state",
+    wrap      = "/.toyota-wrap-state"
+}
+
+-- If this is true, the turtle will break blocks in its way.
+local willBreakBlocks = true
+
+-- Number of attempts to break the block in front of it
+-- This is mainly for gravel/sand
+local numberOfTriesToBreakBlocks = 20
+
+
+
+-------------------------------------------------------------------------------
+-- Constants                                                                 --
+-------------------------------------------------------------------------------
+
+-- The current version of the API.
+version = "0.1"
+
+
+-- Movement directions, used for move state, as a bidirectional map.
+private.direction = {
+    [1] = "forward", [2] = "back", [3] = "up", [4] = "down",
+    forward = 1,     back = 2,     up = 3,     down = 4
+}
+
+--------------------------------
+-- Movement related functions --
+--------------------------------
+
+--[[
+    Try to move the turtle forward.
+
+    @param tries how often to try to move. If this larger than zero, the turtle
+        will try to dig its way through any obstructions as many times (e.g. to
+        get through stacks of sand or gravel).
+    @param aggressive if set to true, will also try to attack to clear its way
+        when obstructed.
+    @return true if the turtle moved successfully, (false, reason) if it failed
+        and is still in the same position.
+]]
+function forward()
+    return private.move(private.direction.forward)
+end
+
+
+function private.move(direction)
+
+    print("Moving turtle: " .. tostring(direction))
+
+    -- Check our fuel.
+    if turtle.getFuelLevel() < 1 then
+        print("ERROR, OUT OF FUEL")
+        return false
+    end
+
+    -- move forward
+    if direction = private.direction.forward then
+        forward()
+    end
+    
+end
