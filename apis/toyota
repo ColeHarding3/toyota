@@ -44,14 +44,7 @@ local apiPath = "apis/lama"
 -- and facing of the turtle, as well as whether it is currently moving or not.
 -- We split this up into several files to keep file i/o while moving minimal.
 -- You may want to change this if it collides with another program or API.
-local stateFile = {
-    position  = "/.lama-state",
-    waypoints = "/.lama-waypoints",
-    fuel      = "/.lama-fuel",
-    move      = "/.lama-move-state",
-    path      = "/.lama-path-state",
-    wrap      = "/.lama-wrap-state"
-}
+local file_fuel = "toyota-memory/fuel"
 
 
 function supertest()
@@ -59,11 +52,11 @@ function supertest()
 end
 
 function readFuelState()
-    if not fs.exists(stateFile.fuel) then
+    if not fs.exists(file_fuel) then
         return nil
     end
 
-    local file = fs.open(stateFile.fuel, "r")
+    local file = fs.open(file_fuel, "r")
     if file then
         local fuel = tonumber(file.readLine())
         file.close()
@@ -72,43 +65,39 @@ function readFuelState()
     return nil
 end
 
-function writeFuelState(fuel)
-    local file = fs.open(stateFile.fuel, "w")
-    if file then
-        file.writeLine(tostring(fuel))
-        file.close()
-    end
+function writeFuelState()
+   local logFile = fs.open(file_fuel, "a")
+   if logFile then
+       logFile.writeLine(tostring(initialFuel))
+   end
 end
 
+
 function toyotaforward()
-    print("toyota forward start")
+    print("---toyota forward start---")
 
-    -- Get initial fuel level from the state file
-    local initialFuel = readFuelState() or 0
+    -- Get initial fuel level
+    local initialFuel = turtle.getFuelLevel()
 
-    -- Open a file for logging
-    local logFile = fs.open("fuel_log.txt", "a")
-    if logFile then
-        logFile.writeLine("Initial Fuel: " .. tostring(initialFuel))
-    end
+    -- log fuel before movement
+    writeFuelState()
 
     -- Attempt to move forward
     local success = turtle.forward()
 
-    -- Get the new fuel level from turtle API and update state file
-    local finalFuel = turtle.getFuelLevel()
-    writeFuelState(finalFuel)
+    -- check if fuel level changed
+    local currentFuel = turtle.getFuelLevel()
+    local previousFuel = readFuelState()
+    print("Fuel after move: " .. tostring(currentFuel))
+    print("Fuel before move: " .. tostring(previousFuel))
 
-    -- Log the result
-    if logFile then
-        logFile.writeLine("Final Fuel: " .. tostring(finalFuel))
-        logFile.writeLine("Fuel Used: " .. tostring(initialFuel - finalFuel))
-        logFile.writeLine("Move Success: " .. tostring(success))
-        logFile.writeLine("------------------------")
-        logFile.close()
+    if currentFuel < previousFuel then
+        print("movement confirmed.")
+    else
+        print("movement is hosed")
     end
 
-    print("toyota forward end")
-end
 
+    print("---toyota forward end---")
+end
 
