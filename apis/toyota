@@ -40,5 +40,6 @@ end
 function toyotaforward()
     print("toyota forward start")
     turtle.forward()
+    print("toyota forward end")
 end
 
