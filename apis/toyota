@@ -37,5 +37,8 @@ function supertest()
     print("super test worked from TOYOTA")
 end
 
-
+function toyotaforward()
+    print("toyota forward start")
+    turtle.forward()
+end
 
