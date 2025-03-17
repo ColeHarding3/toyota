@@ -6,6 +6,8 @@ if not http then
 end
 
 local branch = "main"
+local maxRetries = 5
+local retryDelay = 60
 
 -- The list of files to fetch.
 local files = {
@@ -42,7 +44,7 @@ function minify(code)
         :gsub("^%-%-[^%[]*$", "")
         local keep = not inMultilineComment
         if inMultilineComment then
-            if line == "]]" then
+            if line == "]]") then
                 inMultilineComment = false
             end
         elseif line:match("^%-%-%[%[") then
@@ -59,43 +61,81 @@ end
 -- Get the running script's path
 local scriptPath = shell.getRunningProgram()
 
--- Automatically download all files.
-for _, file in ipairs(files) do
-    fs.makeDir(file.folder)
-    local path = fs.combine(file.folder, file.name)
+-- Function to fetch a file with retries for toyota
+function fetchToyota()
+    local path = fs.combine("apis", "toyota")
+    local lastVersion = nil
     
     if fs.exists(path) then
-        print("File '" .. path .. "' already exists. Deleting...")
-        fs.delete(path)
+        local f = fs.open(path, "r")
+        lastVersion = f.readAll()
+        f.close()
     end
-    
-    print("Fetching '" .. file.name .. "'...")
-    local request = http.get(file.url)
-    if request then
-        local response = request.getResponseCode()
-        if response == 200 then
-            local script = request.readAll()
-            if file.minify then
-                script = minify(script)
+
+    for attempt = 1, maxRetries do
+        print("Fetching 'toyota' (Attempt " .. attempt .. "/" .. maxRetries .. ")...")
+        local request = http.get(files[1].url)
+        if request then
+            local response = request.getResponseCode()
+            if response == 200 then
+                local script = request.readAll()
+                if files[1].minify then
+                    script = minify(script)
+                end
+                
+                if script ~= lastVersion then
+                    local f = fs.open(path, "w")
+                    f.write(script)
+                    f.close()
+                    print("Successfully updated 'toyota'.")
+                    return true
+                else
+                    print("No changes detected, retrying in " .. retryDelay .. " seconds...")
+                    os.sleep(retryDelay)
+                end
+            else
+                print("Error: Bad HTTP response code " .. response .. ".")
             end
-            local f = fs.open(path, "w")
-            f.write(script)
-            f.close()
-            print("Done.")
         else
-            print("Error: Bad HTTP response code " .. response .. ".")
+            print("Error: Failed to fetch file.")
         end
-    else
-        print("Error: Failed to fetch file.")
     end
-    print()
+    print("Failed to update 'toyota' after " .. maxRetries .. " attempts.")
+    return false
+end
+
+-- Fetch toyota first before the others
+if fetchToyota() then
+    for i = 2, #files do
+        local file = files[i]
+        fs.makeDir(file.folder)
+        local path = fs.combine(file.folder, file.name)
+        
+        print("Fetching '" .. file.name .. "'...")
+        local request = http.get(file.url)
+        if request then
+            local response = request.getResponseCode()
+            if response == 200 then
+                local script = request.readAll()
+                local f = fs.open(path, "w")
+                f.write(script)
+                f.close()
+                print("Done.")
+            else
+                print("Error: Bad HTTP response code " .. response .. ".")
+            end
+        else
+            print("Error: Failed to fetch file.")
+        end
+        print()
+    end
 end
 
 -- Delete the script if it is in the root directory
 if scriptPath and not scriptPath:find("/") then
     print("Deleting installer from root...")
     fs.delete(scriptPath)
-	print("Deleted installer. If you wish to update TOYOTA, please use the '/programs/toyota-updater' instead.")
+    print("Deleted installer. If you wish to update TOYOTA, please use the '/programs/toyota-updater' instead.")
 end
 
 -- Prevent last key entry to be entered in the shell.
