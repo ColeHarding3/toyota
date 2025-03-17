@@ -1,6 +1,6 @@
 print("start EXTREMELY BASIC toyota test")
 
-os.loadAPI("apis/toyota")
+local toyota = require("apis/toyota")
 
 print("api loaded")
 
