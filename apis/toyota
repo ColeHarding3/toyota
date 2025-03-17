@@ -1,0 +1,32 @@
+--[[
+    TOYOTA - Tracked Operations Yielding Optimized Turtle Automation - 2025 Cole
+
+    This program is licensed under the MIT license.
+    http://opensource.org/licenses/mit-license.php
+
+    I will attempt to create an API that tracks turtle movements even when the
+    turtle is moving while the game shuts down or whatever. I will use fuel
+    for directional moving, and some kind of backtracking for rotation.
+
+    The API is relatively basic, in that it is purely focused on movement. It's
+    essentially a rich drop-in replacement for the the original navigational
+    functions in the turtle API:
+        turtle.forward   -> toyota.forward
+        turtle.back      -> toyota.back
+        turtle.up        -> toyota.up
+        turtle.down      -> toyota.down
+        turtle.turnRight -> toyota.turnRight
+        turtle.turnLeft  -> toyota.turnLeft
+
+    When using this API, you must not use any other functions that alter
+    the turtle's position or facing. In particular:
+
+        DO NOT USE turtle.forward, turtle.back, turtle.up, turtle.down,
+        turtle.turnRight or turtle.turnLeft NOR THEIR NATIVE EQUIVALENTS.
+
+    Any other external force changing the turtle's position will also
+    invalidate the coordinates, of course (such as the player pickaxing the
+    turtle and placing it somewhere else or RP2 frames).
+
+    This was inspired by LAMA - Location Aware Movement API - 2013 Sangar
+]]
