@@ -6,4 +6,6 @@ print("api loaded")
 
 toyota.supertest()
 
+toyota.toyotaforward()
+
 print("done")
