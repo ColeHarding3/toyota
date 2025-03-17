@@ -1,3 +1,5 @@
+-- TOYOTA INSTALLER --
+
 if not http then
     print("Sorry, I need access to the internet to download stuff.")
     return
@@ -22,6 +24,11 @@ local files = {
         folder = "programs",
         name = "toyota-test",
         url = "https://github.com/coleharding3/toyota/raw/"..branch.."/programs/toyota-test"
+    },
+	{
+        folder = "programs",
+        name = "toyota-updater",
+        url = "https://github.com/coleharding3/toyota/raw/"..branch.."/programs/toyota-updater"
     }
 }
 
